@@ -5,6 +5,7 @@ import '../screens/cart_screen.dart';
 import '../widgets/badge.dart';
 import 'package:provider/provider.dart';
 import '../widgets/products_grid.dart';
+import '../providers/products.dart';
 
 enum FilterOptions {
   Favourites,
@@ -19,6 +20,42 @@ class ProductsOverviewScreeen extends StatefulWidget {
 
 class _ProductsOverviewScreeenState extends State<ProductsOverviewScreeen> {
   var _showOnlyFavorites = false;
+  var _isLoading = false;
+
+  // var _isInit = true;
+
+  @override
+  void initState() {
+    setState(() {
+      _isLoading = true;
+    });
+
+    Provider.of<Products>(context, listen: false)
+        .fetchAndSetProducts()
+        .then((_) {
+      setState(() {
+        _isLoading = false;
+      });
+    });
+    //if we dont care about context this is fine
+
+    //but if we are concerned about context
+    // Future.delayed(Duration.zero).then((_) =>
+    //     {Provider.of<Products>(context, listen: false).fetchAndSetProducts()});
+
+    super.initState();
+  }
+  //or we can use didchangedependencies
+
+  // @override
+  // void didChangeDependencies() {
+  //   if (_isInit) {
+  //     Provider.of<Products>(context, listen: false).fetchAndSetProducts();
+  //   }
+  //   _isInit = false;
+  //   super.didChangeDependencies();
+  // }
+
   @override
   Widget build(BuildContext context) {
     // final productContainer = Provider.of<Products>(context, listen: false);
@@ -63,7 +100,11 @@ class _ProductsOverviewScreeenState extends State<ProductsOverviewScreeen> {
         ],
       ),
       drawer: AppDrawer(),
-      body: ProductsGrid(_showOnlyFavorites),
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : ProductsGrid(_showOnlyFavorites),
     );
   }
 }
